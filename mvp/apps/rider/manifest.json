@@ -1,0 +1,13 @@
+{
+  "name": "qs-takeout-rider",
+  "appid": "__UNI__TAKEOUT_RIDER",
+  "description": "骑手端：抢单配送",
+  "versionName": "0.1.0",
+  "versionCode": "100",
+  "vueVersion": "3",
+  "mp-weixin": {
+    "appid": "",
+    "setting": { "urlCheck": false },
+    "usingComponents": true
+  }
+}

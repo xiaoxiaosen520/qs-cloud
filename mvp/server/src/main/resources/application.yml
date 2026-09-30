@@ -1,0 +1,83 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: qs-takeout-server
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/qs_takeout?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto
+      insert-strategy: not_null
+      update-strategy: not_null
+
+qs:
+  jwt:
+    secret: qs-takeout-dev-secret-change-me-32bytes!!
+    expire-hours: 720
+  sms:
+    # true：可用固定验证码 123456；真实验证码见日志
+    dev-fixed-code: true
+  upload:
+    dir: uploads
+  order:
+    # 超时扫表间隔（毫秒）
+    timeout-scan-ms: 15000
+  rider:
+    # 自有骑手抢单，暂未自招时关闭；后期改 true
+    self-enabled: false
+  fengniao:
+    # true=本地 Mock 推进运单；有开放平台密钥后改 false
+    mock: true
+    mock-step-ms: 20000
+    sandbox: true
+    app-id: ""
+    secret: ""
+    notify-url: http://127.0.0.1:8080/api/delivery/fengniao/notify
+    position-source: 3
+  pay:
+    # App 已接支付宝沙箱；H5 浏览器无支付宝时再改回 true
+    mock-enabled: false
+    # 沙箱/正式回调都要公网可达；本地用穿透后改这里
+    notify-base-url: http://uba99367.natappfree.cc
+    wechat:
+      # 商户参数配齐后改 true
+      enabled: false
+      # 未接商户时勿开模拟（避免和支付宝并列出假入口）
+      dev-simulate: false
+      # 微信开放平台「移动应用」AppID
+      app-id: ""
+      # 微信支付商户号
+      mch-id: ""
+      # 商户平台 → API 安全 → APIv3 密钥
+      api-v3-key: ""
+      # 商户 API 证书序列号
+      serial-no: ""
+      # 二选一：私钥文件路径，或下面 private-key 内联
+      private-key-path: ""
+      private-key: ""
+      notify-path: /api/pay/notify/wechat
+    alipay:
+      enabled: true
+      sandbox: true
+      # 密钥配齐后必须 false，否则仍走模拟
+      dev-simulate: false
+      app-id: "9021000168678899"
+      # 必须填「应用私钥」（密钥工具生成后保存在本地的那把，通常更长、常以 MIIE 开头）
+      # 你刚才填的两段都是公钥格式（MIIBIjAN...），私钥不对会签名失败
+      private-key: "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC9tAEAxjByD7Rnx/3am0/UmfexLvOfqse5yrfgOD+So/NROq9rvRHIz4oJiEZGj5K4mwrYjntpuR8kr6nARYXVhFDOjoDgRQzDRQacVksTiToH+Dy/Abz825W/IBJfku/WhmHudUE1eIRV3RSwDT2+4PnAB2afbcaQQaT/onSy1TGY5eRsZuB+ckK8SRipZY5I4dVTbn2LyLv9DHkHbXoP9SvpTQjQVkQxYuTHKUH6kI2gZTZVhcgchGNE2uzjhstDQCTxZ9ubnJOoxglraCYa9sPfimMIinLEcSfEeqHmkUxgU/f4ls1FZ9lrbSnTEZ012b1dz3nkrUhStyktXfLFAgMBAAECggEAdQgKol6iXou/wVLJEkdEraU7AK01kSg7xSwB2ir5VU8d+dvZgv8GbLtUrmLK8Bb87jSAMW9dRbD2PJy+faamVT4m1/dkHHec0w7PcD1wXaIIEgib+T5qSBhzvpBbpWix28fVvNXLn+A0y//zFlVk5VBH46btMaf4muBUmXywv+3jmHMs9hsRsED211hcxaPcmk5xAWmFk4RQ1gl8918LN5VNrMwdw2NSoZVoBQOwxH8leejK31LnLy2RIRHi112kMgBiSXqyAXz61Y+IKw5alk0AvV0sSC5IPwTQaCBki4YQb0IVvn39hlAlI7JLAONs/SOZ5i4IsgDbc24nSzaP9QKBgQDwUBnR07AnqzbL5hU0YtyPczVRYMdwCz4KmSnDC8MD0iLd3s1egug0dzZo5ar6IDcTa+dwzqsRh40sKICj9KMMfFjnvZaWN4OLYOmtMdrOdfCkTYd3TvHuUfOeZTDRlwvkjquRdM7NLgL6Uq4/YURMm1b/4D2PMoKFEDDO5wV/LwKBgQDKFig1xIxm1TqfGTknFQKj1VTp0HuixgIjvwKsdGMubcmpDAamGE/nL3t5rljXnvu8UJPNHIuWj8TU1msKEdgkUMljplph8Jf4QGZOV4LCBUg7rl2bUmWdEDINheg3wnu5elOhcOHxCFH2QMKFPhzubqC1T61+EVr+zVN/YG1QSwKBgQC3b81lt7sdbLo1RnolNNm7vmuSpNdYFZzUJjoUoqPIBN2Mkwgc/rwVYHJt+/JZX8Hq11EhcQBwLxJ6BKi9fn3/h+OtcbDDFbkZ6W42QHoPY0O/h1bCocZW7sORwxhSxIPVgXpBW/KH+HlZb0eHJc4m0+TDCP60kg/DVqqLJRmzDQKBgBieemeSekhM0cdwGzZXqOqsopuZenZqCPix3HGF/E87sMWXYXf6nkFb138LbmdWRvS6HEdwotDE0wXa2U9wvRQvg1lQetJTrS/hKJWCs7tPSW174It7jkWEI5TiK1gfqVL/RBD234+to86MNSZmWr/xWkK8YjZphtxjxzhNVwPhAoGBANBf+XZ4OCerRm2wEL0HnVC/GTy+vNuO+zNSC5mTw/vnJk1HxBC36nzV8JVclTB7K924UTbklQY3Q/mNXLu0lCSc0HIiQe/ogrG52Jkl2g7asHve0NFP9ybNvwuMcf/9uu17AnAyO0Rw9pdqwiT+TJQAf7mDHQdj3TFOzxQaCH+R"
+      # 支付宝公钥（开放平台下载的那把，不是应用公钥）
+      alipay-public-key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqCDzbqmeGPF5mNq9uVhTjKmEb1K+ObhE00MKRAevCoLpDZh6t4Uzx/FG9T2zlkDHvPsihqPTan6CNZiWC5W/A3sHNQNHUggxfVsJQdaDz59tvextHuKpz9JWeNwSp5xAULTDq5scycSdwCdxmPDFmMSb/MelBhCdwh2HdcUbIKSROUB8KOt6o+C8vMFNLkJBtDl8DI/bHuFrCs1plxE8BryHEN/w2ozob4gxdX2JGoAe+a9nwpF6G1oIPmrKDX2y0of+dQD5hbkEC6dZWu3SCqNMWxhcbYMJnAkqcXIDsuN8/447UjmK1l5rIsAcRjCvDZqfL0g8t4voDuSYI2xLLQIDAQAB"
+      notify-path: /api/pay/notify/alipay
+      return-url: ""

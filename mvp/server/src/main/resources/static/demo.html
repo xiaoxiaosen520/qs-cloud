@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QS Takeout 联调</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; }
+    button { margin: 6px 8px 6px 0; padding: 8px 14px; cursor: pointer; }
+    pre { background: #111; color: #d6ffd6; padding: 12px; overflow: auto; border-radius: 8px; min-height: 140px; }
+    input { padding: 6px 8px; margin: 4px 0; width: 100%; box-sizing: border-box; }
+    label { display: block; margin-top: 10px; font-size: 14px; color: #444; }
+    .token { font-size: 12px; color: #666; word-break: break-all; }
+    hr { margin: 28px 0; border: none; border-top: 1px solid #eee; }
+  </style>
+</head>
+<body>
+  <h1>本地联调</h1>
+  <p>不要用地址栏直接打开 <code>/api/**</code>（那是 GET）。点按钮会发正确的方法。</p>
+  <p class="token">商家 token：<span id="tokenView">无</span></p>
+  <p class="token">用户 token：<span id="userTokenView">无</span></p>
+
+  <h3>1. 管理员</h3>
+  <input id="adminUser" value="admin" />
+  <input id="adminPass" value="123456" />
+  <button onclick="adminLogin()">登录</button>
+  <button onclick="listApplies()">待审入驻</button>
+  <input id="applyId" placeholder="申请 id" />
+  <button onclick="approveApply()">审核通过</button>
+  <button onclick="listWithdraws()">待审提现</button>
+  <input id="withdrawId" placeholder="提现 id" />
+  <button onclick="approveWithdraw()">提现通过</button>
+  <button onclick="rejectWithdraw()">提现驳回</button>
+
+  <h3>2. 商家登录</h3>
+  <input id="phone" value="13800138000" />
+  <button onclick="sendSms()">发验证码</button>
+  <button onclick="merchantLogin()">登录并保存 token</button>
+
+  <h3>3. 入驻 / 营业 / 商品</h3>
+  <button onclick="apply()">提交入驻（便利店）</button>
+  <button onclick="applyStatus()">申请状态</button>
+  <button onclick="openShop()">开门营业</button>
+  <button onclick="addCategory()">加分类「饮料」</button>
+  <button onclick="addGoods()">上架可乐</button>
+  <button onclick="myGoods()">我的商品</button>
+  <button onclick="merchantOrders()">商家订单</button>
+  <input id="orderId" placeholder="订单 id" />
+  <button onclick="acceptOrder()">接单</button>
+  <button onclick="completeOrder()">完成配送</button>
+  <button onclick="wallet()">查看钱包</button>
+  <button onclick="todayStats()">今日统计</button>
+
+  <h3>4. 用户下单</h3>
+  <input id="userPhone" value="13700002222" />
+  <button onclick="userLogin()">用户登录</button>
+  <button onclick="nearby()">附近店铺</button>
+  <input id="shopId" placeholder="店铺 id" />
+  <button onclick="shopGoods()">看商品并记住 sku</button>
+  <input id="skuId" placeholder="sku id" />
+  <button onclick="addAddress()">加收货地址</button>
+  <button onclick="addCart()">加入购物车</button>
+  <button onclick="viewCart()">看购物车</button>
+  <button onclick="createOrder()">下单并 mock 支付</button>
+  <button onclick="myOrders()">我的订单</button>
+
+  <hr />
+  <pre id="out">等待操作…</pre>
+
+  <script>
+    const out = document.getElementById('out')
+    let merchantToken = localStorage.getItem('merchantToken') || ''
+    let adminToken = localStorage.getItem('adminToken') || ''
+    let userToken = localStorage.getItem('userToken') || ''
+    let lastCategoryId = Number(localStorage.getItem('categoryId') || 0)
+    let lastAddressId = Number(localStorage.getItem('addressId') || 0)
+    let lastSkuId = Number(localStorage.getItem('skuId') || 0)
+    document.getElementById('tokenView').textContent = merchantToken || '无'
+    document.getElementById('userTokenView').textContent = userToken || '无'
+    if (lastSkuId) document.getElementById('skuId').value = lastSkuId
+
+    function show(data) {
+      out.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2)
+    }
+    async function req(method, path, body, token) {
+      show(method + ' ' + path + ' …')
+      const res = await fetch(path, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: 'Bearer ' + token } : {})
+        },
+        body: body ? JSON.stringify(body) : undefined
+      })
+      const json = await res.json()
+      show(json)
+      return json
+    }
+    async function adminLogin() {
+      const json = await req('POST', '/api/admin/login', {
+        username: document.getElementById('adminUser').value,
+        password: document.getElementById('adminPass').value
+      })
+      if (json.code === 0) {
+        adminToken = json.data.token
+        localStorage.setItem('adminToken', adminToken)
+      }
+    }
+    async function listApplies() {
+      const json = await req('GET', '/api/admin/applies?status=PENDING', null, adminToken)
+      if (json.code === 0 && json.data && json.data.records && json.data.records[0]) {
+        document.getElementById('applyId').value = json.data.records[0].id
+      }
+    }
+    async function approveApply() {
+      const id = document.getElementById('applyId').value
+      if (!id) { show('先填申请 id'); return }
+      await req('POST', '/api/admin/applies/' + id + '/review', { approved: true }, adminToken)
+    }
+    async function listWithdraws() {
+      const json = await req('GET', '/api/admin/withdraws?status=PENDING', null, adminToken)
+      if (json.code === 0 && json.data && json.data[0]) {
+        document.getElementById('withdrawId').value = json.data[0].id
+      }
+    }
+    async function approveWithdraw() {
+      const id = document.getElementById('withdrawId').value
+      if (!id) { show('先填提现 id'); return }
+      await req('POST', '/api/admin/withdraws/' + id + '/review', { approved: true }, adminToken)
+    }
+    async function rejectWithdraw() {
+      const id = document.getElementById('withdrawId').value
+      if (!id) { show('先填提现 id'); return }
+      await req('POST', '/api/admin/withdraws/' + id + '/review', { approved: false, reason: '资料不全' }, adminToken)
+    }
+    async function sendSms() {
+      await req('POST', '/api/auth/sms/send', {
+        phone: document.getElementById('phone').value,
+        scene: 'LOGIN_MERCHANT'
+      })
+    }
+    async function merchantLogin() {
+      const json = await req('POST', '/api/auth/sms/login', {
+        phone: document.getElementById('phone').value,
+        code: '123456',
+        role: 'MERCHANT'
+      })
+      if (json.code === 0) {
+        merchantToken = json.data.token
+        localStorage.setItem('merchantToken', merchantToken)
+        document.getElementById('tokenView').textContent = merchantToken
+        if (json.data.shopId) document.getElementById('shopId').value = json.data.shopId
+      }
+    }
+    async function userLogin() {
+      await req('POST', '/api/auth/sms/send', {
+        phone: document.getElementById('userPhone').value,
+        scene: 'LOGIN_USER'
+      })
+      const json = await req('POST', '/api/auth/sms/login', {
+        phone: document.getElementById('userPhone').value,
+        code: '123456',
+        role: 'USER'
+      })
+      if (json.code === 0) {
+        userToken = json.data.token
+        localStorage.setItem('userToken', userToken)
+        document.getElementById('userTokenView').textContent = userToken
+      }
+    }
+    async function apply() {
+      await req('POST', '/api/merchant/apply', {
+        contactName: '张三',
+        contactPhone: '13800138000',
+        shopName: '夜猫便利店',
+        shopType: 'CONVENIENCE',
+        categoryId: 2,
+        notice: '欢迎光临',
+        logoUrl: '/uploads/demo-logo.png',
+        withinUrl: '/uploads/demo-within.png',
+        licenseUrl: '/uploads/demo-license.png',
+        idCardFrontUrl: '/uploads/demo-id-front.png',
+        idCardBackUrl: '/uploads/demo-id-back.png',
+        address: '测试路1号',
+        houseNumber: '108室',
+        lat: 31.2304,
+        lng: 121.4737
+      }, merchantToken)
+    }
+    async function applyStatus() {
+      await req('GET', '/api/merchant/apply/status', null, merchantToken)
+    }
+    async function openShop() {
+      await req('PUT', '/api/merchant/shop', { openStatus: 1, notice: '欢迎光临' }, merchantToken)
+    }
+    async function addCategory() {
+      const json = await req('POST', '/api/merchant/categories', { name: '饮料', sort: 1 }, merchantToken)
+      if (json.code === 0) {
+        lastCategoryId = json.data.id
+        localStorage.setItem('categoryId', String(lastCategoryId))
+      }
+    }
+    async function addGoods() {
+      if (!lastCategoryId) { show('请先点「加分类」'); return }
+      const json = await req('POST', '/api/merchant/goods', {
+        categoryId: lastCategoryId,
+        name: '可乐',
+        skus: [{ name: '500ml', price: 3.5, stock: 100 }]
+      }, merchantToken)
+      if (json.code === 0 && json.data.skus && json.data.skus[0]) {
+        lastSkuId = json.data.skus[0].id
+        localStorage.setItem('skuId', String(lastSkuId))
+        document.getElementById('skuId').value = lastSkuId
+      }
+    }
+    async function myGoods() {
+      await req('GET', '/api/merchant/goods', null, merchantToken)
+    }
+    async function merchantOrders() {
+      const json = await req('GET', '/api/merchant/orders', null, merchantToken)
+      if (json.code === 0 && json.data && json.data[0]) {
+        const first = json.data[0].order || json.data[0]
+        document.getElementById('orderId').value = first.id
+      }
+    }
+    async function acceptOrder() {
+      const id = document.getElementById('orderId').value
+      if (!id) { show('先填订单 id'); return }
+      await req('POST', '/api/merchant/orders/' + id + '/accept', {}, merchantToken)
+    }
+    async function completeOrder() {
+      const id = document.getElementById('orderId').value
+      if (!id) { show('先填订单 id'); return }
+      await req('POST', '/api/merchant/orders/' + id + '/complete', {}, merchantToken)
+    }
+    async function wallet() {
+      await req('GET', '/api/merchant/wallet', null, merchantToken)
+    }
+    async function todayStats() {
+      await req('GET', '/api/merchant/stats/today', null, merchantToken)
+    }
+    async function nearby() {
+      const json = await req('GET', '/api/shops/nearby?lat=31.2304&lng=121.4737')
+      if (json.code === 0 && json.data && json.data[0]) {
+        document.getElementById('shopId').value = json.data[0].shop.id
+      }
+    }
+    async function shopGoods() {
+      const id = document.getElementById('shopId').value
+      if (!id) { show('先填店铺 id'); return }
+      const list = await req('GET', '/api/shops/' + id + '/goods')
+      if (list.code === 0 && list.data && list.data[0]) {
+        const detail = await req('GET', '/api/shops/goods/' + list.data[0].id)
+        if (detail.code === 0 && detail.data.skus && detail.data.skus[0]) {
+          lastSkuId = detail.data.skus[0].id
+          localStorage.setItem('skuId', String(lastSkuId))
+          document.getElementById('skuId').value = lastSkuId
+        }
+      }
+    }
+    async function addAddress() {
+      const json = await req('POST', '/api/user/addresses', {
+        contactName: '王五',
+        contactPhone: '13700002222',
+        detail: '测试小区1栋',
+        lat: 31.231,
+        lng: 121.474,
+        isDefault: true
+      }, userToken)
+      if (json.code === 0) {
+        lastAddressId = json.data.id
+        localStorage.setItem('addressId', String(lastAddressId))
+      }
+    }
+    async function addCart() {
+      const skuId = Number(document.getElementById('skuId').value || lastSkuId)
+      if (!skuId) { show('先拿到 sku id'); return }
+      await req('POST', '/api/cart/items', { skuId, quantity: 1 }, userToken)
+    }
+    async function viewCart() {
+      await req('GET', '/api/cart', null, userToken)
+    }
+    async function createOrder() {
+      const shopId = Number(document.getElementById('shopId').value)
+      if (!shopId || !lastAddressId) { show('需要 shopId 和地址（先加地址）'); return }
+      const json = await req('POST', '/api/orders', {
+        shopId,
+        addressId: lastAddressId,
+        mockPay: true,
+        remark: '联调订单'
+      }, userToken)
+      if (json.code === 0) {
+        document.getElementById('orderId').value = json.data.order.id
+      }
+    }
+    async function myOrders() {
+      await req('GET', '/api/orders', null, userToken)
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+{
+  "pages": [
+    {
+      "path": "pages/home/index",
+      "style": {
+        "navigationBarTitleText": "抢单大厅",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/order/list",
+      "style": {
+        "navigationBarTitleText": "我的配送",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/order/detail",
+      "style": { "navigationBarTitleText": "订单详情" }
+    },
+    {
+      "path": "pages/im/chat",
+      "style": { "navigationBarTitleText": "联系顾客" }
+    },
+    {
+      "path": "pages/im/list",
+      "style": {
+        "navigationBarTitleText": "顾客消息",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/mine/index",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/finance/index",
+      "style": { "navigationBarTitleText": "我的钱包" }
+    },
+    {
+      "path": "pages/finance/billing",
+      "style": { "navigationBarTitleText": "资金流水" }
+    },
+    {
+      "path": "pages/finance/withdraw",
+      "style": { "navigationBarTitleText": "提现" }
+    },
+    {
+      "path": "pages/stats/index",
+      "style": {
+        "navigationBarTitleText": "订单统计",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/reviews/index",
+      "style": {
+        "navigationBarTitleText": "我的评价",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/set/index",
+      "style": { "navigationBarTitleText": "设置" }
+    },
+    {
+      "path": "pages/set/profile",
+      "style": { "navigationBarTitleText": "个人资料" }
+    },
+    {
+      "path": "pages/set/bind-phone",
+      "style": { "navigationBarTitleText": "更换手机号" }
+    },
+    {
+      "path": "pages/webview/index",
+      "style": { "navigationBarTitleText": "详情" }
+    },
+    {
+      "path": "pages/login/index",
+      "style": {
+        "navigationBarTitleText": "骑手登录",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/agreement/index",
+      "style": { "navigationBarTitleText": "服务协议" }
+    }
+  ],
+  "tabBar": {
+    "color": "#6b7c74",
+    "selectedColor": "#e85d04",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "抢单"
+      },
+      {
+        "pagePath": "pages/order/list",
+        "text": "配送"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于上报位置与订单导航"
+    }
+  },
+  "requiredBackgroundModes": ["location"],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "区惠骑手",
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#f3f6f4"
+  }
+}

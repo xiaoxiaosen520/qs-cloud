@@ -1,0 +1,9 @@
+{
+  "name": "qs-takeout-user",
+  "version": "0.1.0",
+  "private": true,
+  "description": "用 HBuilderX 打开本目录运行；或自行用官方 uni-app vite 模板迁移 pages/api",
+  "scripts": {
+    "hint": "echo Use HBuilderX to run this uni-app project"
+  }
+}

@@ -1,0 +1,75 @@
+<template>
+  <div class="page-card">
+    <div class="toolbar">
+      <el-input v-model="query.keyword" clearable placeholder="手机号/昵称" style="width: 200px" @keyup.enter="search" />
+      <el-select v-model="query.status" clearable placeholder="状态" style="width: 120px">
+        <el-option label="正常" :value="1" />
+        <el-option label="禁用" :value="0" />
+      </el-select>
+      <el-button type="primary" @click="search">查询</el-button>
+    </div>
+    <el-table :data="rows" v-loading="loading" stripe>
+      <el-table-column prop="id" label="ID" width="80" />
+      <el-table-column prop="nickname" label="昵称" min-width="120" />
+      <el-table-column prop="phone" label="手机号" width="140" />
+      <el-table-column prop="status" label="状态" width="100">
+        <template #default="{ row }">
+          <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">
+            {{ row.status === 1 ? '正常' : '禁用' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="createdAt" label="注册时间" width="170" />
+      <el-table-column label="操作" width="120">
+        <template #default="{ row }">
+          <el-button link :type="row.status === 1 ? 'danger' : 'success'" @click="toggle(row)">
+            {{ row.status === 1 ? '禁用' : '启用' }}
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <div class="pager">
+      <el-pagination
+        v-model:current-page="query.page"
+        v-model:page-size="query.size"
+        layout="total, prev, pager, next"
+        :total="total"
+        @current-change="load"
+      />
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { onMounted, reactive, ref } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { adminApi } from '../api/admin'
+
+const loading = ref(false)
+const rows = ref([])
+const total = ref(0)
+const query = reactive({ keyword: '', status: undefined, page: 1, size: 20 })
+
+async function load() {
+  loading.value = true
+  try {
+    const page = await adminApi.users(query)
+    rows.value = page?.records || []
+    total.value = page?.total || 0
+  } finally {
+    loading.value = false
+  }
+}
+function search() {
+  query.page = 1
+  load()
+}
+async function toggle(row) {
+  const next = row.status === 1 ? 0 : 1
+  await ElMessageBox.confirm(next === 0 ? '确认禁用该用户？' : '确认启用？')
+  await adminApi.updateUserStatus(row.id, next)
+  ElMessage.success('已更新')
+  load()
+}
+onMounted(load)
+</script>

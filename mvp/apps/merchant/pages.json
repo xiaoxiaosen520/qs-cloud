@@ -1,0 +1,119 @@
+{
+  "pages": [
+    {
+      "path": "pages/home/index",
+      "style": {
+        "navigationBarTitleText": "工作台",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/order/list",
+      "style": {
+        "navigationBarTitleText": "订单",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/order/detail",
+      "style": { "navigationBarTitleText": "订单详情" }
+    },
+    {
+      "path": "pages/im/chat",
+      "style": { "navigationBarTitleText": "联系顾客" }
+    },
+    {
+      "path": "pages/im/list",
+      "style": {
+        "navigationBarTitleText": "顾客消息",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/goods/list",
+      "style": {
+        "navigationBarTitleText": "商品",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/goods/edit",
+      "style": { "navigationBarTitleText": "编辑商品" }
+    },
+    {
+      "path": "pages/goods/create-method",
+      "style": {
+        "navigationBarTitleText": "选择建品方式",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/goods/search-create",
+      "style": { "navigationBarTitleText": "搜索建品" }
+    },
+    {
+      "path": "pages/shop/index",
+      "style": { "navigationBarTitleText": "店铺设置" }
+    },
+    {
+      "path": "pages/mine/index",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/finance/index",
+      "style": { "navigationBarTitleText": "资金账户" }
+    },
+    {
+      "path": "pages/finance/billing",
+      "style": { "navigationBarTitleText": "资金流水" }
+    },
+    {
+      "path": "pages/finance/withdraw",
+      "style": { "navigationBarTitleText": "提现" }
+    },
+    {
+      "path": "pages/apply/index",
+      "style": { "navigationBarTitleText": "商家入驻" }
+    },
+    {
+      "path": "pages/login/index",
+      "style": {
+        "navigationBarTitleText": "商家登录",
+        "navigationStyle": "custom"
+      }
+    }
+  ],
+  "tabBar": {
+    "color": "#6b7c74",
+    "selectedColor": "#e85d04",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "工作台"
+      },
+      {
+        "pagePath": "pages/order/list",
+        "text": "订单"
+      },
+      {
+        "pagePath": "pages/goods/list",
+        "text": "商品"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "区惠商家",
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#f3f6f4"
+  }
+}
